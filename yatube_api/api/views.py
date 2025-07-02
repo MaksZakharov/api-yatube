@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from posts.models import Post, Comment
-from api.serializers import PostSerializer, CommentSerializer
+from posts.models import Group, Post, Comment
+from api.serializers import PostSerializer, CommentSerializer, GroupSerializer
 from api.permissions import IsAuthorOrReadOnly
+from rest_framework import mixins, viewsets
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -28,3 +29,11 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             post=Post.objects.get(id=post_id)
         )
+
+
+class GroupViewSet(mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
