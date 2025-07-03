@@ -1,28 +1,10 @@
-from rest_framework import mixins, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from posts.models import Comment, Group, Post
-
+from posts.models import Group, Post
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import CommentSerializer, GroupSerializer, PostSerializer
-
-
-class PostViewSet(viewsets.ModelViewSet):
-    """
-    Вьюсет для модели Post с CRUD операциями.
-
-    Ограничения:
-    - Только аутентифицированные пользователи могут создавать посты.
-    - Только автор поста может изменять или удалять его.
-    """
-
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
-
-    def perform_create(self, serializer):
-        """При создании поста автоматически назначает автора."""
-        serializer.save(author=self.request.user)
+from api.serializers import CommentSerializer, GroupSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -37,23 +19,22 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
+    def get_post(self):
+        """Возвращает объект поста или 404."""
+        return get_object_or_404(Post, id=self.kwargs.get('post_id'))
+
     def get_queryset(self):
         """Возвращает комментарии к конкретному посту."""
-        post_id = self.kwargs.get('post_id')
-        return Comment.objects.filter(post__id=post_id)
+        post = self.get_post()
+        return post.post_comments.all()
 
     def perform_create(self, serializer):
-        """При создании комментария автоматически назначает автора и пост."""
-        post_id = self.kwargs.get('post_id')
-        serializer.save(
-            author=self.request.user,
-            post=Post.objects.get(id=post_id)
-        )
+        """При создании комментария назначает автора и пост."""
+        post = self.get_post()
+        serializer.save(author=self.request.user, post=post)
 
 
-class GroupViewSet(mixins.ListModelMixin,
-                   mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Вьюсет для модели Group.
 
