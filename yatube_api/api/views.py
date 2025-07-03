@@ -4,7 +4,23 @@ from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Group, Post
 from api.permissions import IsAuthorOrReadOnly
-from api.serializers import CommentSerializer, GroupSerializer
+from api.serializers import CommentSerializer, GroupSerializer, PostSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """
+    Вьюсет для модели Post с CRUD операциями.
+
+    Ограничения:
+    - Только авторизованные пользователи могут создавать посты.
+    - Только автор поста может изменять или удалять его.
+    """
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -12,7 +28,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     Вьюсет для комментариев, связанных с постами.
 
     Ограничения:
-    - Только аутентифицированные пользователи могут создавать комментарии.
+    - Только авторизованные пользователи могут создавать комментарии.
     - Только автор комментария может его изменять или удалять.
     """
 

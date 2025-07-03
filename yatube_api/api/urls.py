@@ -8,8 +8,10 @@ v1_router = DefaultRouter()
 v1_router.register('posts', PostViewSet, basename='post')
 v1_router.register('groups', GroupViewSet, basename='group')
 
+# группируем v1-эндпоинты
 v1_patterns = [
     path('', include(v1_router.urls)),
+    path('api-token-auth/', views.obtain_auth_token),
     re_path(
         r'^posts/(?P<post_id>\d+)/comments/$',
         CommentViewSet.as_view({'get': 'list', 'post': 'create'}),
@@ -25,7 +27,6 @@ v1_patterns = [
         }),
         name='comment-detail',
     ),
-    path('api-token-auth/', views.obtain_auth_token),
 ]
 
 urlpatterns = [
