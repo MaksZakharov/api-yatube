@@ -9,6 +9,7 @@ User = get_user_model()
 class PostSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели Post.
+
     Поле author отображается через username.
     """
 
@@ -25,6 +26,7 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели Comment.
+
     Поле author отображается через username.
     Поле post доступно только для чтения.
     """

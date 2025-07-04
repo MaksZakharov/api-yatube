@@ -47,7 +47,7 @@ class Post(models.Model):
         Group,
         verbose_name='Группа',
         on_delete=models.SET_NULL,
-        related_name='group_posts',
+        related_name='posts',
         blank=True,
         null=True
     )
@@ -81,6 +81,6 @@ class Comment(models.Model):
     def __str__(self):
         return (
             f'Комментарий от {self.author} '
-            f'к посту: "{self.post.text[:STR_LENGTH]}" — '
+            f'к посту: "{self.post}" — '
             f'{self.text[:STR_LENGTH]}'
         )
